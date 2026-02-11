@@ -6,7 +6,14 @@
 
 using namespace std;
 
-
+/*************************************************************
+ *  CONSTRUCTOR: Business()
+ *  PURPOSE: Initializes a Business object with a name and
+ *           maximum capacity for games and rental items.
+ *  PARAMETERS: Text* sN - business name pointer
+ *              int mG - maximum number of games
+ *              int mRI - maximum number of rental items
+ *************************************************************/
 Business::Business(Text* sN, int mG, int mRI){
     businessName = sN;
     maxGames = mG;
@@ -19,6 +26,11 @@ Business::Business(Text* sN, int mG, int mRI){
     gameArray = new Game*[maxGames];
 }
 
+/*************************************************************
+ *  DESTRUCTOR: ~Business()
+ *  PURPOSE: Releases all dynamically allocated memory for
+ *           games, rental items, and their arrays.
+ *************************************************************/
 Business::~Business(){
     cout << "Business Destructor: " << endl;
     
@@ -39,8 +51,13 @@ Business::~Business(){
     
 }
 
+/*************************************************************
+ *  FUNCTION: resizeGameArray()
+ *  PURPOSE: Doubles the capacity of the game array when it
+ *           becomes full. Copies existing games to new array.
+ *************************************************************/
 void Business::resizeGameArray(){
-    cout << "RESIZING GAME ARRAY...from " << maxGames << " to a new size of " << (maxGames * 2) << endl;
+    cout << "\n\nRESIZING GAME ARRAY...from " << maxGames << " to a new size of " << (maxGames * 2) << endl << endl;
             
             // Create new game array with double capacity
             Game** newGameArray = new Game*[(maxGames * 2)];
@@ -56,8 +73,14 @@ void Business::resizeGameArray(){
             maxGames = maxGames * 2;
 }
 
+/*************************************************************
+ *  FUNCTION: resizeRentItemArray()
+ *  PURPOSE: Doubles the capacity of the rental item array
+ *           when it becomes full. Copies existing items to
+ *           new array.
+ *************************************************************/
 void Business::resizeRentItemArray(){
-     cout << "RESIZING rentItem ARRAY...from " << maxRentItems << " to a new size of " << (maxRentItems * 2) << endl;
+     cout << "\n\nRESIZING rentItem ARRAY...from " << maxRentItems << " to a new size of " << (maxRentItems * 2) << endl << endl;
             
             // Create new rentItem array with double capacity
             RentItem** newrentItemArray = new RentItem*[(maxRentItems * 2)];
@@ -73,14 +96,30 @@ void Business::resizeRentItemArray(){
             maxRentItems = maxRentItems * 2;
 }
 
+/*************************************************************
+ *  FUNCTION: getNumGames()
+ *  PURPOSE: Returns the current number of games in the array
+ *************************************************************/
 int Business::getNumGames(){
     return numGames;
 }
 
+/*************************************************************
+ *  FUNCTION: getnumRentItems()
+ *  PURPOSE: Returns the current number of rental items in
+ *           the array
+ *************************************************************/
 int Business::getnumRentItems(){
     return numRentItems;
 }
 
+/*************************************************************
+ *  FUNCTION: addGamesFromFile()
+ *  PURPOSE: Reads games from a file and adds them to the
+ *           game array. Each game record consists of:
+ *           name, description, cost, numPlayers, 
+ *           maxOccupancy, and duration.
+ *************************************************************/
 void Business::addGamesFromFile(){
     string filename;
     string gameName;
@@ -90,6 +129,7 @@ void Business::addGamesFromFile(){
     int maxOccupancy;
     float gameDurationInHours;
 
+    cin.ignore();
     cout << "What is the name of the file that contains games? " << endl;
     getline(cin, filename);
 
@@ -129,12 +169,21 @@ void Business::addGamesFromFile(){
         Text* name = new Text(gameName.c_str());
         Text* description = new Text(gameDescription.c_str());
         gameArray[numGames] = new Game(name, description, gameCost, numPlayers, maxOccupancy, gameDurationInHours);
+        cout << gameName << " was added to the array" << endl;
         numGames++;
     }
     
     inputFile.close();
+    cout << "\nAll games from " << filename << " have been added" << endl;
 }
 
+/*************************************************************
+ *  FUNCTION: addItemsFromFile()
+ *  PURPOSE: Reads rental items from a file and adds them to
+ *           the rental item array. Each item record consists
+ *           of: name, description, cost, howManyInStock,
+ *           and rentDurationInHours.
+ *************************************************************/
 void Business::addItemsFromFile(){
     string filename;
     string rentItemName;
@@ -143,6 +192,7 @@ void Business::addItemsFromFile(){
     int howManyInStock;
     float rentItemDurationInHours;
 
+    cin.ignore();
     cout << "What is the name of the file that contains rentItems? " << endl;
     getline(cin, filename);
 
@@ -178,26 +228,36 @@ void Business::addItemsFromFile(){
         Text* name = new Text(rentItemName.c_str());
         Text* description = new Text(rentItemDescription.c_str());
         rentItemArray[numRentItems] = new RentItem(name, description, rentItemCost, howManyInStock, rentItemDurationInHours);
+        cout << rentItemName << " was added to the array" << endl;
         numRentItems++;
     }
 
     inputFile.close();
+    cout << "\nAll items from " << filename << " have been added" << endl;
 }
 
+/*************************************************************
+ *  FUNCTION: addGameToItem()
+ *  PURPOSE: Associates each rental item with a game. Allows
+ *           user to select which game each rental item is
+ *           used with, or skip if no association needed.
+ *************************************************************/
 void Business::addGameToItem(){
-    int chosenGame;
+    int chosenGame = 0;
     
     printGameNames();
 
-    for(int i = 0; i < sizeof(rentItemArray); i++){
-        cout <<"Which game would you like the " << rentItemArray[i] << "to be associated with?" <<endl;
+    for(int i = 0; i < numRentItems; i++){
+        cout <<"Which game would you like the " << rentItemArray[i]->getItemName()->getText() << " to be associated with?" <<endl;
         cout<< "Enter the number of the game from the list above, or enter -1 to skip this item." << endl;
 
-        while(!cin || chosenGame != -1 && (chosenGame < 1 || chosenGame > numGames)){
-            cin >> chosenGame;
-            cin.ignore();
-
+        while(!(cin >> chosenGame) || (chosenGame != -1 && (chosenGame < 1 || chosenGame > numGames))){
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cout << "Invalid input. Please enter a valid number." << endl;
         }
+        cin.ignore();
+        cout << endl;
 
         if(chosenGame != -1){
             rentItemArray[i]->setGameAssociation(gameArray[(chosenGame-1)]);
@@ -208,6 +268,12 @@ void Business::addGameToItem(){
     }
 }
 
+/*************************************************************
+ *  FUNCTION: addGameToArray()
+ *  PURPOSE: Prompts user to enter game details (name,
+ *           description, cost, players, occupancy, duration)
+ *           and adds a new game to the game array.
+ *************************************************************/
 void Business::addGameToArray(){
     string gameName;
     string gameDescription;
@@ -216,6 +282,7 @@ void Business::addGameToArray(){
     int maxOccupancy; 
     float gameDurationInHours; 
 
+    cin.ignore();
     cout <<"What is the name of the game? " << endl;
     getline(cin, gameName);
 
@@ -245,12 +312,17 @@ void Business::addGameToArray(){
     if(numGames == maxGames){
         resizeGameArray();
     }
-    numGames += 1;
     Game* newGame = new Game(new Text(gameName.c_str()), new Text(gameDescription.c_str()), gameCost, numPlayers, maxOccupancy, gameDurationInHours);
     gameArray[numGames] = newGame;
+    numGames += 1;
     
 }
 
+/*************************************************************
+ *  FUNCTION: editGameInArray()
+ *  PURPOSE: Allows user to select a game from the list and
+ *           edit its details (name, description, cost, etc).
+ *************************************************************/
 void Business::editGameInArray(){
     int editNum;
 
@@ -266,6 +338,12 @@ void Business::editGameInArray(){
 
 }
 
+/*************************************************************
+ *  FUNCTION: removeGameFromArray()
+ *  PURPOSE: Allows user to select a game to remove. Removes
+ *           the game, updates any rental items associated
+ *           with it, and shifts remaining games down in array.
+ *************************************************************/
 void Business::removeGameFromArray(){
     int delGame;
 
@@ -276,18 +354,27 @@ void Business::removeGameFromArray(){
     cin >> delGame;
     cin.ignore();
 
-     for(int i = 0; i < sizeof(rentItemArray); i++){
+     for(int i = 0; i < numRentItems; i++){
         if(rentItemArray[i]->getGameAssociation() == gameArray[delGame-1]){
             rentItemArray[i]->setGameAssociation(nullptr);
         }
-
      }
 
-    gameArray[delGame-1]->~Game();
-    delete[] gameArray[delGame-1];
-
+    delete gameArray[delGame-1];
+    
+    // Shift games down to fill the gap
+    for(int i = delGame-1; i < numGames-1; i++){
+        gameArray[i] = gameArray[i+1];
+    }
+    numGames--;
 }
 
+/*************************************************************
+ *  FUNCTION: addRentItemToArray()
+ *  PURPOSE: Prompts user to enter rental item details
+ *           (name, description, cost, stock, duration) and
+ *           associates it with a selected game.
+ *************************************************************/
 void Business::addRentItemToArray(){
     int gameAssociation;
     string itemName;
@@ -326,11 +413,17 @@ void Business::addRentItemToArray(){
     if(numRentItems == maxRentItems){
         resizeRentItemArray();
     }
-    numRentItems += 1;
     RentItem* newItem = new RentItem(gameArray[gameAssociation-1], new Text(itemName.c_str()), new Text(itemDescription.c_str()), itemCost, howManyInStock, rentDurationInHours);
     rentItemArray[numRentItems] = newItem;
+    numRentItems += 1;
 }
 
+/*************************************************************
+ *  FUNCTION: editRentItemInArray()
+ *  PURPOSE: Allows user to select a rental item from the
+ *           list and edit its details (name, description,
+ *           cost, stock quantity, rental duration).
+ *************************************************************/
 void Business::editRentItemInArray(){
     int editNum;
 
@@ -344,6 +437,11 @@ void Business::editRentItemInArray(){
     rentItemArray[editNum-1]->editRentItemDetails();
 }
 
+/*************************************************************
+ *  FUNCTION: removeRentItemFromArray()
+ *  PURPOSE: Allows user to select a rental item to remove
+ *           from the rental item array.
+ *************************************************************/
 void Business::removeRentItemFromArray(){
     int delItem;
 
@@ -359,23 +457,39 @@ void Business::removeRentItemFromArray(){
     delete[] rentItemArray[delItem-1];
 }
 
+/*************************************************************
+ *  FUNCTION: printGameNames()
+ *  PURPOSE: Displays a numbered list of all games currently
+ *           in the game array.
+ *************************************************************/
 void Business::printGameNames(){
     cout << "Here is the list of games you currently have: " << endl;
-    for(int i = 0; i < sizeof(gameArray); i ++){
-        cout << i+1 << ":\t\t" << gameArray[i]->getGameName()->getText() << endl << endl; 
+    for(int i = 0; i < numGames; i ++){
+        cout << i+1 << ":\t" << gameArray[i]->getGameName()->getText() << endl; 
     }
 }
 
+/*************************************************************
+ *  FUNCTION: printRentItemNames()
+ *  PURPOSE: Displays a numbered list of all rental items
+ *           currently in the rental item array.
+ *************************************************************/
 void Business::printRentItemNames(){
     cout << "Here is the list of rent items you currently have: " << endl;
-    for(int i = 0; i < sizeof(rentItemArray); i ++){
-        cout << i+1 << ":\t\t" << rentItemArray[i]->getItemName()->getText() << endl << endl; 
+    for(int i = 0; i < numRentItems; i ++){
+        cout << i+1 << ":\t" << rentItemArray[i]->getItemName()->getText() << endl; 
     }
 }
 
+/*************************************************************
+ *  FUNCTION: printGames()
+ *  PURPOSE: Displays detailed information for all games in
+ *           the game array including name, description,
+ *           cost, players, occupancy, and duration.
+ *************************************************************/
 void Business::printGames(){
     cout << "Here is the list of all your games: " << endl;
-     for(int i = 0; i < sizeof(gameArray); i ++){
+     for(int i = 0; i < numGames; i ++){
         cout<< "****************************************" << endl;
 
         cout << "GAME" << i+1 << endl;
@@ -384,9 +498,15 @@ void Business::printGames(){
     }
 }
 
+/*************************************************************
+ *  FUNCTION: printRentItems()
+ *  PURPOSE: Displays detailed information for all rental
+ *           items in the array including name, description,
+ *           cost, stock quantity, and rental duration.
+ *************************************************************/
 void Business::printRentItems(){
     cout << "Here is the list of all your rental items: " << endl;
-     for(int i = 0; i < sizeof(rentItemArray); i ++){
+     for(int i = 0; i < numRentItems; i ++){
         cout<< "****************************************" << endl;
 
         cout << "RENT ITEM" << i+1 << endl;
@@ -396,6 +516,13 @@ void Business::printRentItems(){
     }
 }
 
+/*************************************************************
+ *  FUNCTION: saveData()
+ *  PURPOSE: Prompts user for filenames and saves all games
+ *           and rental items to separate output files in a
+ *           format that can be read back with addGamesFromFile()
+ *           and addItemsFromFile().
+ *************************************************************/
 void Business::saveData(){
     string gameFile;
     string itemFile;

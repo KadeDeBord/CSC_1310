@@ -75,13 +75,16 @@ void Game::editGameDetails()
 		cout << "\t5.\tMaximum Occupancy\n";
 		cout << "\t6.\tGame Duration\n";
 		cout << "\t7.\tDONE EDITING\n";
-		cout << "CHOOSE 1-6:  ";
-		cin >> choice;
-		while(choice < 1 || choice > 7)
+		cout << "CHOOSE 1-7:  ";
+		while(!(cin >> choice) || choice < 1 || choice > 7)
 		{
+			if(!cin)
+			{
+				cin.clear();
+				cin.ignore(10000, '\n');
+			}
 			cout << "\n\nInvalid choice.  You must select a number between 1 and 7.\n";
 			cout << "CHOOSE 1-7:  ";
-			cin >> choice;
 		}
 		cin.ignore();
 		switch(choice)

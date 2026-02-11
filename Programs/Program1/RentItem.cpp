@@ -86,12 +86,15 @@ void RentItem::editRentItemDetails()
 		cout << "\t5.\tRent Duration In Hours\n";
 		cout << "\t6.\tDONE EDITING\n";
 		cout << "CHOOSE 1-6:  ";
-		cin >> choice;
-		while(choice < 1 || choice > 6)
+		while(!(cin >> choice) || choice < 1 || choice > 6)
 		{
+			if(!cin)
+			{
+				cin.clear();
+				cin.ignore(10000, '\n');
+			}
 			cout << "\n\nInvalid choice.  You must select a number between 1 and 6.\n";
 			cout << "CHOOSE 1-6:  ";
-			cin >> choice;
 		}
 		cin.ignore();
 		switch(choice)

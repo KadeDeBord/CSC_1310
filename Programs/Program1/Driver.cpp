@@ -47,13 +47,16 @@ int main()
 		cout << "\t12.\tSave All Data\n";
 		cout << "\t13.\tQuit the Program\n";
 		cout << "CHOOSE 1-13:  ";
-		cin >> choice;
 		
-		while(choice < 1 || choice > 13)
+		while(!(cin >> choice) || choice < 1 || choice > 13)
 		{
+			if(!cin)
+			{
+				cin.clear();
+				cin.ignore(10000, '\n');
+			}
 			cout << "\nOops!  That was an invalid choice.\n";
-			cout << "CHOOSE 1-12:  ";
-			cin >> choice;
+			cout << "CHOOSE 1-13:  ";
 		}
 
 		switch(choice)

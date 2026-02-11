@@ -1,6 +1,6 @@
 cls
-make clean
+mingw32-make clean
 
-make
+mingw32-make
 
-Business < TEST_CASE.txt > RESULT_OF_TEST_CASE.txt
+Business < TEST_CASE.txt
